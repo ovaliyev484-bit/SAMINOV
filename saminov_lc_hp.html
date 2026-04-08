@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Saminov LC HP Platform</title>
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #4338ca;
+            --secondary: #0ea5e9;
+            --accent: #f59e0b;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --white: #ffffff;
+            --danger: #ef4444;
+            --success: #10b981;
+            --gray: #94a3b8;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --radius: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #f1f5f9;
+            color: var(--dark);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* App Container */
+        #app-container {
+            width: 100%;
+            max-width: 480px; /* Mobile first approach */
+            height: 100%;
+            background: var(--white);
+            position: relative;
+            overflow-y: auto;
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+        }
+
+        @media (min-width: 768px) {
+            #app-container {
+                max-width: 100%;
+                height: 100vh;
+                display: flex;
+                flex-direction: row;
+            }
+            .sidebar {
+                width: 280px !important;
+                display: flex !important;
+                flex-direction: column;
+                border-right: 1px solid #e2e8f0;
+            }
+            .main-content {
+                flex: 1;
+                padding: 2rem;
+                overflow-y: auto;
+            }
+            .bottom-nav {
+                display: none !important;
+            }
+        }
+
+        /* Login Screen */
+        .screen {
+            display: none;
+            height: 100%;
+            flex-direction: column;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        #login-screen {
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+
+        .login-card {
+            background: var(--white);
+            padding: 2.5rem;
+            border-radius: var(--radius);
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        .logo-area {
+            margin-bottom: 2rem;
+        }
+
+        .logo-icon {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark);
+            font-size: 0.9rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: var(--radius);
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-input:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 0.9rem;
+            border: none;
+            border-radius: var(--radius);
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        /* Dashboard Layout */
+        .dashboard-layout {
+            display: flex;
+            height: 100%;
+            width: 100%;
+        }
+
+        .sidebar {
+            display: none; /* Hidden on mobile */
+            background: var(--white);
+            padding: 1.5rem;
+            width: 100%;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            color: var(--gray);
+            text-decoration: none;
+            border-radius: var(--radius);
+            margin-bottom: 0.5rem;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .nav-item.active, .nav-item:hover {
+            background: rgba(79, 70, 229, 0.1);
+            color: var(--primary);
+        }
+
+        .nav-item i {
+            margin-right: 1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            padding-bottom: 80px; /* Space for bottom nav */
+        }
+
+        @media (min-width: 768px) {
+            .main-content {
+                padding-bottom: 1rem;
+            }
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        /* Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--white);
+            padding: 1.2rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid #f1f5f9;
+        }
+
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 0.8rem;
+            font-size: 1.2rem;
+        }
+
+        .bg-blue-light { background: rgba(14, 165, 233, 0.1); color: var(--secondary); }
+        .bg-green-light { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+        .bg-orange-light { background: rgba(245, 158, 11, 0.1); color: var(--accent); }
+        .bg-red-light { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--gray);
+        }
+
+        /* Sections */
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .certificate-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .cert-item {
+            background: var(--white);
+            padding: 1rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cert-info h4 {
+            font-size: 1rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .cert-info p {
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+
+        .status-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-active { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+        .status-pending { background: rgba(245, 158, 11, 0.1); color: var(--accent); }
+
+        /* Bottom Navigation (Mobile) */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: var(--white);
+            display: flex;
+            justify-content: space-around;
+            padding: 0.8rem 0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            z-index: 100;
+        }
+
+        @media (min-width: 768px) {
+            .bottom-nav {
+                display: none;
+            }
+        }
+
+        .nav-link {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--gray);
+            text-decoration: none;
+            font-size: 0.75rem;
+            gap: 0.3rem;
+        }
+
+        .nav-link.active {
+            color: var(--primary);
+        }
+
+        .nav-link i {
+            font-size: 1.2rem;
+        }
+
+        /* Floating Action Button */
+        .fab {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.4);
+            cursor: pointer;
+            z-index: 90;
+            transition: transform 0.2s;
+        }
+
+        .fab:active {
+            transform: scale(0.9);
+        }
+
+        @media (min-width: 768px) {
+            .fab {
+                bottom: 40px;
+                right: 40px;
+            }
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: var(--radius);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .qr-placeholder {
+            width: 200px;
+            height: 200px;
+            background: #f1f5f9;
+            margin: 1rem auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 10px;
+            border: 2px dashed var(--gray);
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--dark);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            z-index: 2000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        /* Utility */
+        .hidden { display: none; }
+        .text-center { text-align: center; }
+        .mt-2 { margin-top: 1rem; }
+        .text-sm { font-size: 0.85rem; }
+        .text-gray { color: var(--gray); }
+
+    </style>
+</head>
+<body>
+
+<div id="app-container">
+    
+    <!-- LOGIN SCREEN -->
+    <div id="login-screen" class="screen active">
+        <div class="login-card">
+            <div class="logo-area">
+                <i class="fas fa-graduation-cap logo-icon"></i>
+                <h2>Saminov LC HP</h2>
+                <p class="text-gray text-sm">Ta'lim Platformasi</p>
+            </div>
+            
+            <form id="login-form">
+                <div class="form-group">
+                    <label class="form-label">Login / ID</label>
+                    <input type="text" class="form-input" placeholder="admin yoki user" id="username" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Parol</label>
+                    <input type="password" class="form-input" placeholder="******" id="password" required>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    Kirish <i class="fas fa-arrow-right"></i>
+                </button>
+            </form>
+            <p class="mt-2 text-sm text-gray">Demo: admin / 1234</p>
+        </div>
+    </div>
+
+    <!-- DASHBOARD SCREEN -->
+    <div id="dashboard-screen" class="screen">
+        <div class="dashboard-layout">
+            
+            <!-- Sidebar (Desktop) -->
+            <div class="sidebar">
+                <div class="logo-area" style="padding-left: 1rem;">
+                    <h3 style="color: var(--primary);">Saminov LC</h3>
+                </div>
+                <nav style="margin-top: 2rem;">
+                    <a href="#" class="nav-item active" onclick="switchTab('home')">
+                        <i class="fas fa-home"></i> Bosh sahifa
+                    </a>
+                    <a href="#" class="nav-item" onclick="switchTab('certificates')">
+                        <i class="fas fa-certificate"></i> Sertifikatlar
+                    </a>
+                    <a href="#" class="nav-item" onclick="switchTab('students')">
+                        <i class="fas fa-users"></i> O'quvchilar
+                    </a>
+                    <a href="#" class="nav-item" onclick="switchTab('scan')">
+                        <i class="fas fa-qrcode"></i> QR Skaner
+                    </a>
+                    <a href="#" class="nav-item" onclick="logout()" style="margin-top: auto; color: var(--danger);">
+                        <i class="fas fa-sign-out-alt"></i> Chiqish
+                    </a>
+                </nav>
+            </div>
+
+            <!-- Main Content -->
+            <div class="main-content">
+                
+                <!-- Header -->
+                <div class="header">
+                    <div>
+                        <h2 id="page-title">Bosh sahifa</h2>
+                        <p class="text-sm text-gray" id="current-date">Bugun</p>
+                    </div>
+                    <div class="user-info">
+                        <div class="text-right hidden-mobile">
+                            <p style="font-weight: 600;" id="user-name">Admin User</p>
+                            <p class="text-sm text-gray">O'qituvchi</p>
+                        </div>
+                        <div class="avatar">A</div>
+                    </div>
+                </div>
+
+                <!-- HOME TAB -->
+                <div id="tab-home" class="tab-content">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon bg-blue-light"><i class="fas fa-users"></i></div>
+                            <div class="stat-value">1,240</div>
+                            <div class="stat-label">Jami O'quvchilar</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon bg-green-light"><i class="fas fa-check-circle"></i></div>
+                            <div class="stat-value">856</div>
+                            <div class="stat-label">Bitiruvchilar</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon bg-orange-light"><i class="fas fa-file-alt"></i></div>
+                            <div class="stat-value">320</div>
+                            <div class="stat-label">Kurslar</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon bg-red-light"><i class="fas fa-exclamation-triangle"></i></div>
+                            <div class="stat-value">12</div>
+                            <div class="stat-label">Tekshirish kerak</div>
+                        </div>
+                    </div>
+
+                    <div class="section-title">
+                        <span>So'nggi Sertifikatlar</span>
+                        <a href="#" class="text-sm" style="color: var(--primary);" onclick="switchTab('certificates')">Barchasini ko'rish</a>
+                    </div>
+                    
+                    <div class="certificate-list" id="recent-certs">
+                        <!-- JS will populate this -->
+                    </div>
+                </div>
+
+                <!-- CERTIFICATES TAB -->
+                <div id="tab-certificates" class="tab-content hidden">
+                    <div class="form-group" style="display: flex; gap: 10px;">
+                        <input type="text" class="form-input" placeholder="Qidiruv..." id="search-cert">
+                        <button class="btn btn-primary" style="width: auto;"><i class="fas fa-search"></i></button>
+                    </div>
+                    <div class="certificate-list" id="all-certs">
+                        <!-- JS will populate this -->
+                    </div>
+                </div>
+
+                <!-- STUDENTS TAB -->
+                <div id="tab-students" class="tab-content hidden">
+                    <div class="stat-card" style="text-align: center; padding: 3rem;">
+                        <i class="fas fa-users-cog" style="font-size: 3rem; color: var(--gray); margin-bottom: 1rem;"></i>
+                        <h3>O'quvchilar Bazasi</h3>
+                        <p class="text-gray">Bu yerda ro'yxat ko'rinadi...</p>
+                    </div>
+                </div>
+
+                <!-- SCAN TAB -->
+                <div id="tab-scan" class="tab-content hidden">
+                    <div class="stat-card" style="text-align: center;">
+                        <h3>QR Kod Skanerlash</h3>
+                        <p class="text-gray mb-4">Sertifikat haqiqiyligini tekshirish uchun QR kodni skanerlang</p>
+                        
+                        <div class="qr-placeholder" id="camera-view">
+                            <i class="fas fa-camera" style="font-size: 2rem; color: var(--gray);"></i>
+                        </div>
+                        
+                        <button class="btn btn-primary" onclick="simulateScan()">
+                            <i class="fas fa-expand"></i> Kamerani yoqish
+                        </button>
+                        <p class="text-sm text-gray mt-2">*Demo rejimda simulyatsiya ishlaydi</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Mobile Bottom Nav -->
+        <div class="bottom-nav">
+            <a href="#" class="nav-link active" onclick="switchTab('home')" id="nav-home">
+                <i class="fas fa-home"></i>
+                <span>Bosh</span>
+            </a>
+            <a href="#" class="nav-link" onclick="switchTab('certificates')" id="nav-certs">
+                <i class="fas fa-certificate"></i>
+                <span>Sertifikat</span>
+            </a>
+            <div class="fab" onclick="switchTab('scan')">
+                <i class="fas fa-qrcode"></i>
+            </div>
+            <a href="#" class="nav-link" onclick="switchTab('students')" id="nav-students">
+                <i class="fas fa-users"></i>
+                <span>Guruh</span>
+            </a>
+            <a href="#" class="nav-link" onclick="logout()" id="nav-logout">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Chiqish</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- CERTIFICATE DETAIL MODAL -->
+    <div id="cert-modal" class="modal">
+        <div class="modal-content">
+            <div style="width: 80px; height: 80px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
+                <i class="fas fa-award" style="font-size: 2.5rem; color: white;"></i>
+            </div>
+            <h3 id="modal-cert-name">Islom Karimov</h3>
+            <p class="text-gray" id="modal-cert-course">Frontend Dasturlash</p>
+            <div style="margin: 1.5rem 0;">
+                <p><strong>ID:</strong> <span id="modal-cert-id">LC-2023-001</span></p>
+                <p><strong>Sana:</strong> 25.10.2023</p>
+                <p><strong>Holat:</strong> <span class="status-badge status-active">Haqiqiy</span></p>
+            </div>
+            <div class="qr-placeholder" style="width: 150px; height: 150px; margin: 0 auto 1.5rem;">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=SaminovLC-Verify-123" alt="QR">
+            </div>
+            <button class="btn btn-primary" onclick="closeModal()">Yopish</button>
+            <button class="btn" style="background: #f1f5f9; margin-top: 0.5rem;" onclick="alert('PDF yuklanmoqda...')"><i class="fas fa-download"></i> Yuklab olish</button>
+        </div>
+    </div>
+
+    <!-- TOAST -->
+    <div id="toast" class="toast">Xabar</div>
+
+</div>
+
+<script>
+    // Data Simulation
+    const certificates = [
+        { id: 'LC-001', name: 'Ali Valiyev', course: 'Python Dasturlash', date: '2023-10-25', status: 'active' },
+        { id: 'LC-002', name: 'Vali Aliyev', course: 'Web Dizayn', date: '2023-10-24', status: 'pending' },
+        { id: 'LC-003', name: 'Sarvar Nozov', course: 'Grafik Dizayn', date: '2023-10-23', status: 'active' },
+        { id: 'LC-004', name: 'Malika Karimova', course: 'SMM Marketing', date: '2023-10-22', status: 'active' },
+        { id: 'LC-005', name: 'Jasur Bek', course: 'Video Montaj', date: '2023-10-21', status: 'pending' },
+    ];
+
+    // Init
+    document.addEventListener('DOMContentLoaded', () => {
+        const today = new Date();
+        document.getElementById('current-date').innerText = today.toLocaleDateString('uz-UZ', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        renderCertificates();
+    });
+
+    // Login Logic
+    document.getElementById('login-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const user = document.getElementById('username').value;
+        const pass = document.getElementById('password').value;
+
+        if ((user === 'admin' || user === 'user') && pass === '1234') {
+            showToast('Muvaffaqiyatli kirdingiz!');
+            document.getElementById('login-screen').classList.remove('active');
+            document.getElementById('dashboard-screen').classList.add('active');
+            document.getElementById('user-name').innerText = user === 'admin' ? 'Admin User' : 'O\'qituvchi';
+        } else {
+            showToast('Login yoki parol xato!', true);
+        }
+    });
+
+    function logout() {
+        if(confirm('Chiqishni xohlaysizmi?')) {
+            document.getElementById('dashboard-screen').classList.remove('active');
+            document.getElementById('login-screen').classList.add('active');
+            document.getElementById('password').value = '';
+        }
+    }
+
+    // Navigation Logic
+    function switchTab(tabName) {
+        // Hide all tabs
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+
+        // Show selected tab
+        document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+        
+        // Update Title
+        const titles = {
+            'home': 'Bosh sahifa',
+            'certificates': 'Sertifikatlar',
+            'students': 'O\'quvchilar',
+            'scan': 'QR Skaner'
+        };
+        document.getElementById('page-title').innerText = titles[tabName];
+
+        // Update Active State (Desktop & Mobile)
+        const desktopNav = document.querySelector(`.sidebar .nav-item[onclick="switchTab('${tabName}')"]`);
+        const mobileNav = document.getElementById(`nav-${tabName === 'certificates' ? 'certs' : tabName}`);
+        
+        if(desktopNav) desktopNav.classList.add('active');
+        if(mobileNav) mobileNav.classList.add('active');
+
+        // Special handling for scan button in FAB
+        if(tabName === 'scan') {
+             // FAB is always active visually when clicked, but we don't have a specific nav item for it in bottom bar logic usually
+        }
+    }
+
+    // Render Certificates
+    function renderCertificates() {
+        const recentContainer = document.getElementById('recent-certs');
+        const allContainer = document.getElementById('all-certs');
+        
+        let html = '';
+        certificates.forEach(cert => {
+            const statusClass = cert.status === 'active' ? 'status-active' : 'status-pending';
+            const statusText = cert.status === 'active' ? 'Haqiqiy' : 'Jarayonda';
+            
+            html += `
+                <div class="cert-item" onclick="openCertModal('${cert.id}')">
+                    <div class="cert-info">
+                        <h4>${cert.name}</h4>
+                        <p>${cert.course} • ${cert.date}</p>
+                    </div>
+                    <span class="status-badge ${statusClass}">${statusText}</span>
+                </div>
+            `;
+        });
+
+        recentContainer.innerHTML = html;
+        allContainer.innerHTML = html;
+    }
+
+    // Modal Logic
+    function openCertModal(id) {
+        const cert = certificates.find(c => c.id === id);
+        if(!cert) return;
+
+        document.getElementById('modal-cert-name').innerText = cert.name;
+        document.getElementById('modal-cert-course').innerText = cert.course;
+        document.getElementById('modal-cert-id').innerText = cert.id;
+        
+        document.getElementById('cert-modal').classList.add('active');
+    }
+
+    function closeModal() {
+        document.getElementById('cert-modal').classList.remove('active');
+    }
+
+    // Scan Simulation
+    function simulateScan() {
+        const cameraView = document.getElementById('camera-view');
+        cameraView.innerHTML = '<i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--primary);"></i>';
+        
+        setTimeout(() => {
+            cameraView.innerHTML = '<i class="fas fa-check-circle" style="font-size: 2rem; color: var(--success);"></i>';
+            showToast('QR Kod muvaffaqiyatli o\'qildi!');
+            setTimeout(() => {
+                cameraView.innerHTML = '<i class="fas fa-camera" style="font-size: 2rem; color: var(--gray);"></i>';
+                openCertModal('LC-001'); // Open demo cert
+            }, 1000);
+        }, 2000);
+    }
+
+    // Toast Notification
+    function showToast(message, isError = false) {
+        const toast = document.getElementById('toast');
+        toast.innerText = message;
+        toast.style.background = isError ? 'var(--danger)' : 'var(--dark)';
+        toast.classList.add('show');
+        
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3000);
+    }
+
+    // Close modal on outside click
+    window.onclick = function(event) {
+        const modal = document.getElementById('cert-modal');
+        if (event.target == modal) {
+            closeModal();
+        }
+    }
+</script>
+
+</body>
+</html>
